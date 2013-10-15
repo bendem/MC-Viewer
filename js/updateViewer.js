@@ -1,4 +1,4 @@
-var timer = 2; // période de maj en minutes
+var timer = 5; // période de maj en minutes
 
 chrome.alarms.create("updateTrigerer", {
 	periodInMinutes: timer,
@@ -62,6 +62,9 @@ function xhrReadyHandler() {
 		// 	players[i]
 		// }
 
+		chrome.browserAction.setBadgeText({
+			text: players.length;
+		});
 	}
 }
 
