@@ -1,4 +1,4 @@
-var timer = 5; // période de maj en minutes
+var timer = 5; // Update period in minutes
 
 chrome.alarms.create("updateTrigerer", {
 	periodInMinutes: timer,
@@ -62,6 +62,7 @@ function xhrReadyHandler() {
 		// 	players[i]
 		// }
 
+		// Display the number of connected people on the server right now
 		chrome.browserAction.setBadgeText({
 			text: players.length;
 		});
