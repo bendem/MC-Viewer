@@ -1,0 +1,15 @@
+{
+	"manifest_version": 2,
+
+	"name": "MC-Viewer",
+	"description": "Easy way to know who's connected on http://mc-viewer.bendem.be/",
+	"version": "0.1",
+
+	"permissions": [
+		"http://mumble.wtgeek.be/"
+	],
+	"browser_action": {
+		"default_icon": "img/logo.png",
+		"default_popup": "main.html"
+	}
+}
