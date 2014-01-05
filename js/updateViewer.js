@@ -1,14 +1,27 @@
-var timer = 10; // Update period in minutes
+// Update period in minutes (should be stored in config!)
+var timer = 10;
 
+// Don't try to update e.g. cause of the alarm if it's already updating cause the popup has been opened
+// Could be a timestamp so you don't update every time you open the popup but maybe every 20 seconds
+var isUpdating = false;
+
+// Create an alarm which will trigger the update every ``timer`` minutes
 chrome.alarms.create("updateTrigerer", {
     periodInMinutes: timer,
 });
-
 chrome.alarms.onAlarm.addListener(function(alarm) {
-    update();
+    if(alarm.name == "updateTrigerer") {
+        update();
+    }
 });
 
 function update() {
+    if(isUpdating) {
+        return;
+    }
+    isUpdating = true;
+    console.log("update start");
+
     // Update the viewer and send notifications if join or quit
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = xhrReadyHandler; // Implemented elsewhere.
@@ -74,6 +87,13 @@ function xhrReadyHandler() {
     chrome.browserAction.setBadgeText({
         text: players.length.toString()
     });
+
+    isUpdating = false;
+    console.log("update end");
 }
 
+// Launch the update directly
 update();
+
+// And every time the popup is open
+window.onload = update;
