@@ -5,6 +5,9 @@ var timer = 10;
 // Could be a timestamp so you don't update every time you open the popup but maybe every 20 seconds
 var isUpdating = false;
 
+// Contain the url to use to get the skin (just concat the pseudo to it...)
+var skinUrl = "http://mc-viewer.bendem.be/skin.php?t=head&s=64&u=";
+
 // Create an alarm which will trigger the update every ``timer`` minutes
 chrome.alarms.create("updateTrigerer", {
     periodInMinutes: timer,
@@ -40,7 +43,7 @@ function xhrReadyHandler() {
 
     var notifTemplate = {
         type: "basic",
-        iconUrl: "http://mc-viewer.bendem.be/skin.php?t=head&s=64&u=",
+        iconUrl: skinUrl,
         title: " has ",
         message: " has just "
     }, msgEnd = " from mc.bendem.be", notifDetails;
@@ -80,7 +83,7 @@ function xhrReadyHandler() {
         view.innerHTML = "";
     }
     for (var i = players.length - 1; i >= 0; i--) {
-        view.innerHTML += '<img src="' + notifTemplate.iconUrl + players[i] + '" alt="' + players[i] + '"/>';
+        view.innerHTML += '<img src="' + skinUrl + players[i] + '" alt="' + players[i] + '"/>';
     }
 
     // Update badge number

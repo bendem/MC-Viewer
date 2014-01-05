@@ -3,7 +3,7 @@
 
     "name": "MC-Viewer",
     "description": "Easy way to know who's connected on http://mc-viewer.bendem.be/",
-    "version": "0.1",
+    "version": "1.0",
 
     "permissions": [
         "http://mc-viewer.bendem.be/",
