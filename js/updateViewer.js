@@ -1,4 +1,4 @@
-var timer = 1; // Update period in minutes
+var timer = 10; // Update period in minutes
 
 chrome.alarms.create("updateTrigerer", {
     periodInMinutes: timer,
