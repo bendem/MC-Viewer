@@ -18,6 +18,26 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
     }
 });
 
+var players = {
+    list: [],
+    firstRun: true,
+    diff: {
+        connections:    [],
+        disconnections: []
+    }
+};
+
+Array.prototype.contains = function(p_val) {
+    var l = this.length;
+    for(var i = 0; i < l; i++) {
+        if(this[i] == p_val) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 function update() {
     if(isUpdating) {
         return;
@@ -36,10 +56,7 @@ function xhrReadyHandler() {
     if(this.readyState != XMLHttpRequest.DONE) {
         return;
     }
-    // console.log(JSON.parse(this.response));
-    var response = JSON.parse(this.response)
-        , diff = response.diff                 // Diff should not be handled server-side !
-        , players = response.players;
+    var response = JSON.parse(this.response);
 
     var notifTemplate = {
         type: "basic",
@@ -48,28 +65,51 @@ function xhrReadyHandler() {
         message: " has just "
     }, msgEnd = " from mc.bendem.be", notifDetails;
 
-    // Send connection notification
-    for (var i = diff.connections.length - 1; i >= 0; i--) {
+    // Do not notify the users at first run so the user doesn't get 5 notifications
+    // if 5 players were connected at the time he opens his navigator.
+    if(!players.firstRun) {
+        // Creating diffs
+        players.diff.connections    = [];
+        players.diff.disconnections = [];
+        // Connections
+        for (var i = response.players.length - 1; i >= 0; i--) {
+            if(!players.list.contains(response.players[i])) {
+                players.diff.connections.push(response.players[i]);
+            }
+        }
+        // Disconnections
+        for (i = players.list.length - 1; i >= 0; i--) {
+            if(!response.players.contains(players.list[i])) {
+                players.diff.disconnections.push(players.list[i]);
+            }
+        }
+    } else {
+        players.firstRun = false;
+    }
+    players.list = response.players;
+
+    // Send connection notifications
+    for (var i = players.diff.connections.length - 1; i >= 0; i--) {
         notifDetails = notifTemplate;
-        notifDetails.iconUrl += diff.connections[i];
-        notifDetails.title = diff.connections[i] + notifDetails.title + "connected";
-        notifDetails.message = diff.connections[i] + notifDetails.message + "connected" + msgEnd;
+        notifDetails.iconUrl += players.diff.connections[i];
+        notifDetails.title = players.diff.connections[i] + notifDetails.title + "connected";
+        notifDetails.message = players.diff.connections[i] + notifDetails.message + "connected" + msgEnd;
 
         chrome.notifications.create(
-            diff.connections[i] + "_connected",
+            players.diff.connections[i] + "_connected",
             notifDetails,
             function() {}
         );
     }
-    // Send disconnection notification
-    for (var i = diff.disconnections.length - 1; i >= 0; i--) {
+    // Send disconnection notifications
+    for (i = players.diff.disconnections.length - 1; i >= 0; i--) {
         notifDetails = notifTemplate;
-        notifDetails.iconUrl += diff.disconnections[i];
-        notifDetails.title = diff.disconnections[i] + notifDetails.title + "disconnected";
-        notifDetails.message = diff.disconnections[i] + notifDetails.message + "disconnected" + msgEnd;
+        notifDetails.iconUrl += players.diff.disconnections[i];
+        notifDetails.title = players.diff.disconnections[i] + notifDetails.title + "disconnected";
+        notifDetails.message = players.diff.disconnections[i] + notifDetails.message + "disconnected" + msgEnd;
 
         chrome.notifications.create(
-            diff.disconnections[i] + "_disconnected",
+            players.diff.disconnections[i] + "_disconnected",
             notifDetails,
             function() {}
         );
@@ -77,18 +117,18 @@ function xhrReadyHandler() {
 
     // Update avatars in the popup
     var view = document.querySelector('#main');
-    if(players.length == 0) {
+    if(players.list.length == 0) {
         view.innerHTML = "Pas de joueurs connectés...";
     } else {
         view.innerHTML = "";
     }
-    for (var i = players.length - 1; i >= 0; i--) {
-        view.innerHTML += '<img src="' + skinUrl + players[i] + '" alt="' + players[i] + '"/>';
+    for (var i = players.list.length - 1; i >= 0; i--) {
+        view.innerHTML += '<img src="' + skinUrl + players.list[i] + '" alt="' + players.list[i] + '"/>';
     }
 
     // Update badge number
     chrome.browserAction.setBadgeText({
-        text: players.length.toString()
+        text: players.list.length.toString()
     });
 
     isUpdating = false;
